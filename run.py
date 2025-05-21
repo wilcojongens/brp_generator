@@ -1,17 +1,20 @@
 # === Snelle instellingen voor niet-programmeurs ===
 # Pas hier het aantal dossiers, het aantal bestanden per serie en de leeftijd aan
-DEFAULT_AANTAL_DOSSIERS = 5
+DEFAULT_AANTAL_DOSSIERS = 10
 DEFAULT_AANTAL_BESTANDEN = 1
 DEFAULT_LEEFTIJD = 10
 BRIN_CODE = "BRIN"
 KLAS_OF_GROEP = "groep"
-KLASNUMMER = "1"
+KLASNUMMER = "6"
 NAAM_KLAS = ""
 ONDERWIJSSOORT = "01"
+POSTCODE_RANGE = [7411]
+POSTCODE_LETTERS = [("AA", "ZZ")]
 
 import argparse
 import random
 import os
+import string
 from datetime import datetime, timedelta
 
 # Argument parser toevoegen
@@ -24,6 +27,9 @@ parser.add_argument("--klas_of_groep", type=str, default=KLAS_OF_GROEP, help="Kl
 parser.add_argument("--klasnummer", type=str, default=KLASNUMMER, help="Klas- of groepsnummer")
 parser.add_argument("--naam_klas", type=str, default=NAAM_KLAS, help="Naam van de klas")
 parser.add_argument("--onderwijssoort", type=str, default=ONDERWIJSSOORT, help="Onderwijssoortcode (bijv. 01 voor basisonderwijs)")
+parser.add_argument("--postcode_range", nargs="+", type=int, default=POSTCODE_RANGE, help="Lijst van numerieke postcodes (bv. 7411 7412 7413)")
+parser.add_argument("--postcode_letters", nargs="+", metavar="RANGE", default=["AA", "ZZ"],
+                    help="Letterparen in begin-eind volgorde, bv. AA AZ BA BZ")
 args = parser.parse_args()
 
 aantal_dossiers = args.aantal_dossiers
@@ -34,14 +40,23 @@ KLAS_OF_GROEP = args.klas_of_groep
 KLASNUMMER = args.klasnummer
 NAAM_KLAS = args.naam_klas
 ONDERWIJSSOORT = args.onderwijssoort
+postcode_range = args.postcode_range
+postcode_letters = list(zip(args.postcode_letters[::2], args.postcode_letters[1::2]))
 
-voornamen_man = ["Daan", "Noah", "Jurre", "Ties", "Luuk", "Wessel", "Bas", "Matthijs", "Frank", "Kasper", "Niek", "Joris", "Stijn", "Teun", "Ruud", "Wilco", "Jesse", "Niels", "Tom", "Tim", "Thomas", "Frans", "Stef", "Jos", "Marcel", "Nick"]
-voornamen_vrouw = ["Emma", "Mila", "Sophie", "Julia", "Lotte", "Merel", "Rosa", "Lisa", "Rosanne", "Femke", "Annelot", "Jill", "Kirsten", "Naomi", "Lieke", "Jolien", "Veerle", "Floor", "Fleur", "Eline", "Elisa", "Sterre", "Maartje", "Karlijn", "Evelien", "Maaike", "Annika"]
-achternamen = ["Jansen", "Huisman", "Prins", "Visser", "Visscher", "Mertens", "Maas", "Mulder", "Simons", "Kuiper", "Kuipers", "Dokter", "Hamer", "Boon", "Evers", "Franken", "Molenaar", "Engels", "Bijl", "Verbeke", "Verbeek", "Klaassen", "Arts", "Vis", "Meijer", "Rietveld"]
-postcodes = ["7504PA", "7504PB", "7504PC", "7504PD", "7504PE", "7511AA", "7511AB", "7511AC", "7511AD", "7511AE", "7512BA", "7512BB", "7512BC", "7512BD", "7512BE", "7513CA", "7513CB", "7513CC", "7513CD", "7513CE", "7522DA", "7522DB", "7522DC", "7522DD", "7522DE"]
+voornamen_man = ["Daan", "Noah", "Jurre", "Ties", "Luuk", "Wessel", "Bas", "Matthijs", "Frank", "Kasper", "Niek", "Joris", "Stijn", "Teun", "Ruud", "Wilco", "Jesse", "Niels", "Tom", "Tim", "Thomas", "Frans", "Stef", "Jos", "Marcel", "Nick", "Arnoud", "Arthur", "Bram", "Christian", "Colin", "Dennis", "Richard", "Edwin", "Eric", "Gavin", "Gilian", "Ingmar"]
+voornamen_vrouw = ["Emma", "Mila", "Sophie", "Julia", "Lotte", "Merel", "Rosa", "Lisa", "Rosanne", "Femke", "Annelot", "Jill", "Kirsten", "Naomi", "Lieke", "Jolien", "Veerle", "Floor", "Fleur", "Eline", "Elisa", "Sterre", "Maartje", "Karlijn", "Evelien", "Maaike", "Annika", "Lisanne", "Linda", "Kim", "Kate", "Judith", "Jade", "Ismay", "Ilja", "Hilde", "Danique", "Cisca", "Cindy", "Carla", "Astrid", "Anique", "Anke"]
+achternamen = ["Jansen", "Huisman", "Prins", "Visser", "Visscher", "Mertens", "Maas", "Mulder", "Simons", "Kuiper", "Kuipers", "Dokter", "Hamer", "Boon", "Evers", "Franken", "Molenaar", "Engels", "Bijl", "Verbeke", "Verbeek", "Klaassen", "Arts", "Vis", "Meijer", "Rietveld", "Gorter", "Koopmans", "Brummel", "Pen", "Koorn", "Weustink", "Wiggers", "Langeveld", "Huijboom", "Govers", "Pol", "Nieveld", "Scholten", " Mentink", "Groot", "Baars", "Prinsze", "Albers", "Hartog", "Scherling", "Weijers", "Brink", "Tuitert", "Haspels", "Duzijn", "Tutert", "Klok", "Kooij", "Kuyper", "Wilbrink", "Dijkkamp", "Wissink", "Brouwer", "Weverink", "Nengerman", "Damhuis", "Bruineberg", "Rijneveen", "Nieskens", "Dollekamp", "Spek", "Bon", "Ruigrok"]
 straatnamen = ["Waldeckstraat", "Pyrmontstraat", "Regentessestraat", "Nassaustraat", "Blekerstraat", "Nieuwstraat", "De Regenboog", "Goormaatweg", "IJsselerweg", "Ruwerstraat", "Pathmossingel", "Calicostraat", "Janninksweg", "Heidestraat", "Sterkerstraat", "Drukkerstraat"]
 geboorteplaats = ["Enschede", "Glanerbrug", "Almelo", "Denekamp", "Borne", "Hengelo", "Markelo", "Holten", "Nijverdal", "Oldenzaal", "Rijssen", "Vriezenveen"]
-woonplaats = "Enschede"
+woonplaatsen = ["Enschede"]
+
+def generate_random_postcode():
+    nummer = str(random.choice(postcode_range))
+    while True:
+        letters = ''.join(random.choices(string.ascii_uppercase, k=2))
+        for start, end in postcode_letters:
+            if start <= letters <= end:
+                return f"{nummer}{letters}"
 
 def random_bsn():
     def is_geldig_bsn(bsn_str):
@@ -68,7 +83,7 @@ def generate_record_dict(geslacht):
     achternaam = random.choice(achternamen)
     straatnaam = random.choice(straatnamen)
     huisnummer = random.randint(1, 100)
-    postcode = random.choice(postcodes)
+    postcode = generate_random_postcode()
     bsn = random_bsn()
     geboortedatum = random_datum()
 
@@ -145,7 +160,7 @@ def samenstellen_inspoel(records, bestandsnaam="BRP_inspoel.txt"):
                 maak_brp_regel("B010320", r['geboorteplaats']),             # Geboorteplaats
                 maak_brp_regel("B010330", "Nederland"),              # Geboorteland
                 maak_brp_regel("B010410", r['geslacht']),                   # Geslachtsaanduiding
-                maak_brp_regel("B080910", woonplaats),                         # Gemeente van inschrijving
+                maak_brp_regel("B080910", random.choice(woonplaatsen)),        # Gemeente van inschrijving
                 maak_brp_regel("B081110", r['straatnaam']),                 # Straatnaam
                 maak_brp_regel("B081120", str(r['huisnummer'])),            # Huisnummer
                 maak_brp_regel("B081160", r['postcode'])                    # Postcode
