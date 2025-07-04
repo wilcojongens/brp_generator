@@ -86,7 +86,7 @@ def generate_record_dict(geslacht):
     huisnummer = random.randint(1, 100)
     postcode = generate_random_postcode()
     bsn = random_bsn()
-    geboortedatum = random_datum()
+    geboortedatum = args.geboortedatum if args.geboortedatum else random_datum()
 
     return {
         "bsn": bsn,
@@ -237,7 +237,7 @@ def samenstellen_klassenlijst(records, bestandsnaam="klassenlijst.csv"):
             f.write(";".join(velden) + "\n")
 
 
-def genereer_unieke_mapnaam(prefix="BRP_serie_", basispad="."):
+def genereer_unieke_mapnaam(prefix="BRP_serie_", basispad="../output"):
     teller = 1
     while True:
         mapnaam = os.path.join(basispad, f"{prefix}{teller}")
@@ -255,7 +255,8 @@ if __name__ == "__main__":
                         help="Aantal bestanden per serie")
     parser.add_argument("--leeftijd", type=int, default=DEFAULT_LEEFTIJD,
                         help="Leeftijd van de gegenereerde personen")
-
+    parser.add_argument("--geboortedatum", type=str,
+                        help="Specifieke geboortedatum in YYYYMMDD formaat, laat leeg om te genereren op basis van leeftijd")
     parser.add_argument("--brin", type=str, default=BRIN_CODE,
                         help="BRIN-code van de school")
     parser.add_argument("--klas_of_groep", type=str, default=KLAS_OF_GROEP,

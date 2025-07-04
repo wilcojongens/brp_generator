@@ -8,6 +8,8 @@ optionele arguments;
 
 --leeftijd
 
+--geboortedatum
+
 --brin
 
 --klas_of_groep
