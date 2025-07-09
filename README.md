@@ -53,14 +53,12 @@ Override om een specifieke voornaam voor de vader te hanteren voor alle dossiers
 
 --fixbsnvader
 Override om een specifiek BSN voor de vader te hanteren voor alle dossiers
-Format: y/n
 
 --naammoeder
 --Override om een specifieke voornaam voor de moeder te hanteren voor alle dossiers
 
 --fixbsnmoeder
 Override om een specifiek BSN voor de moeder te hanteren voor alle dossiers
-Format: y/n
 
 --adres
 Override om een specifiek adres te hanteren voor alle dossiers
