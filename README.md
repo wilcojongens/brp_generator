@@ -39,6 +39,12 @@ Default: 01
 Postcode range die gebruikt dient te worden
 Default: [7411]
 
+## Speciale cases
+
+--brusje
+Voeg deze optie toe om te zorgen dat alle dossiers dezelfde achternaam, ouders en adressen bevatten.
+Deze worden dan éénmaal gegenereerd en vervolgens voor alle dossiers hergebruikt.
+
 ## Override arguments
 
 --geboortedatum

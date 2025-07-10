@@ -39,7 +39,16 @@ class schoolRecord:
 # Anders                                98
 # Onbekend                              99
 
-def samenstellen_klassenlijst(records, schoolRecord, bestandsnaam="klassenlijst.csv"):
+def samenstellen_klassenlijst(records, args, bestandsnaam="klassenlijst.csv"):
+    # Maak schoolRecord aan op basis van args
+    school_record = schoolRecord(
+        brinCode=args.brin,
+        klasOfGroep=args.klas_of_groep,
+        klasnummer=args.klasnummer,
+        naamKlas=args.naam_klas,
+        onderwijssoort=args.onderwijssoort
+    )
+    
     header = [
         "BRIN-vestigingsnummer", "Klas of groep", "Klas- of groepnummer", "Naam klas", "Onderwijssoort",
         "Zorgpad", "BSN", "Team", "Geboortedatum", "Geslacht", "Achternaam", "Tussenvoegsel",
@@ -51,11 +60,11 @@ def samenstellen_klassenlijst(records, schoolRecord, bestandsnaam="klassenlijst.
         f.write(";".join(header) + "\n")
         for r in records:
             velden = [
-                schoolRecord.brinCode,                # BRIN-vestigingsnummer
-                schoolRecord.klasOfGroep,             # Klas of groep
-                schoolRecord.klasnummer,              # Klas- of groepnummer
-                schoolRecord.naamKlas,                # Naam klas
-                schoolRecord.onderwijssoort,          # Onderwijssoort
+                school_record.brinCode,                # BRIN-vestigingsnummer
+                school_record.klasOfGroep,             # Klas of groep
+                school_record.klasnummer,              # Klas- of groepnummer
+                school_record.naamKlas,                # Naam klas
+                school_record.onderwijssoort,          # Onderwijssoort
                 "",                                   # Zorgpad
                 r.bsn,                                # BSN
                 "",                                   # Team

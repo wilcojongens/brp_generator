@@ -73,49 +73,190 @@ def generateMultipleRecords(args, aantal, gebruikte_bsns=None, gebruikte_namen=N
         gebruikte_bsns.add(fixed_bsn_moeder)
     
     records = []
-    while len(records) < aantal:
+    max_attempts = aantal * 50  # Voorkom oneindige loops
+    attempts = 0
+    
+    # Logging variabelen
+    bsn_conflicts = 0
+    naam_conflicts = 0
+    
+    while len(records) < aantal and attempts < max_attempts:
+        attempts += 1
         geslacht = random.choice(["M", "V"])
         record = generateSingleRecord(args, geslacht, fixed_bsn_vader, fixed_bsn_moeder)
         naam = (record.voornaamKind, record.achternaam)
         
-        # Controleer of BSN's uniek zijn (alleen het kind-BSN hoeft uniek te zijn als ouder-BSN's gefixed zijn)
-        if fixed_bsn_vader and fixed_bsn_moeder:
-            # Beide ouder-BSN's zijn gefixed, alleen kind-BSN moet uniek zijn
-            if record.bsn in gebruikte_bsns or naam in gebruikte_namen:
-                continue
-        elif fixed_bsn_vader:
-            # Alleen vader-BSN is gefixed
-            bsns_in_record = {record.bsn, record.bsnMoeder}
-            if (record.bsn in gebruikte_bsns or 
-                record.bsnMoeder in gebruikte_bsns or
-                naam in gebruikte_namen or
-                len(bsns_in_record) < 2):
-                continue
-        elif fixed_bsn_moeder:
-            # Alleen moeder-BSN is gefixed
-            bsns_in_record = {record.bsn, record.bsnVader}
-            if (record.bsn in gebruikte_bsns or 
-                record.bsnVader in gebruikte_bsns or
-                naam in gebruikte_namen or
-                len(bsns_in_record) < 2):
-                continue
-        else:
-            # Geen fixed BSN's, alle BSN's moeten uniek zijn
-            bsns_in_record = {record.bsn, record.bsnVader, record.bsnMoeder}
-            if (record.bsn in gebruikte_bsns or 
-                record.bsnVader in gebruikte_bsns or 
-                record.bsnMoeder in gebruikte_bsns or
-                naam in gebruikte_namen or
-                len(bsns_in_record) < 3):
-                continue
+        # Alleen BSN van het kind moet uniek zijn (ouder-BSN's mogen herhaald worden)
+        if record.bsn in gebruikte_bsns:
+            bsn_conflicts += 1
+            continue
+            
+        # Namen mogen herhaald worden (realistische scenario)
+        # Alleen controleren op exacte duplicaten binnen dezelfde set
+        if naam in gebruikte_namen:
+            naam_conflicts += 1
+            continue
         
-        # Voeg alleen nieuwe BSN's toe aan gebruikte set
+        # Voeg alleen kind-BSN toe aan gebruikte set
         gebruikte_bsns.add(record.bsn)
+        gebruikte_namen.add(naam)
+        
+        # Voeg ouder-BSN's alleen toe als ze niet gefixed zijn
         if not fixed_bsn_vader:
             gebruikte_bsns.add(record.bsnVader)
         if not fixed_bsn_moeder:
             gebruikte_bsns.add(record.bsnMoeder)
-        gebruikte_namen.add(naam)
+            
         records.append(record)
+    
+    if len(records) < aantal:
+        print(f"Waarschuwing: Kon slechts {len(records)} van {aantal} records genereren na {max_attempts} pogingen")
+        print(f"  - BSN conflicten: {bsn_conflicts}")
+        print(f"  - Naam conflicten: {naam_conflicts}")
+        print(f"  - Totaal gebruikte BSN's: {len(gebruikte_bsns)}")
+        print(f"  - Totaal gebruikte namen: {len(gebruikte_namen)}")
+        print(f"  - Beschikbare mannelijke namen: {len(voornamen_man)}")
+        print(f"  - Beschikbare vrouwelijke namen: {len(voornamen_vrouw)}")
+        print(f"  - Beschikbare achternamen: {len(achternamen)}")
+        print(f"  - Theoretisch max namen (man): {len(voornamen_man) * len(achternamen)}")
+        print(f"  - Theoretisch max namen (vrouw): {len(voornamen_vrouw) * len(achternamen)}")
+        
+        # Toon een sample van de gebruikte namen
+        if len(gebruikte_namen) > 0:
+            sample_names = list(gebruikte_namen)[:10]
+            print(f"  - Sample gebruikte namen: {sample_names}")
+            
+        # Brusje modus specifieke info
+        if getattr(args, 'brusje', False):
+            print(f"  - Brusje modus: Alle kinderen hebben achternaam '{getattr(args, 'achternaam', 'ONBEKEND')}'")
+            print(f"  - Brusje modus: Alleen voornamen kunnen variëren")
+    
     return records
+
+def generateBrusjeRecords(args, aantal, gebruikte_bsns=None, gebruikte_namen=None):
+    """
+    Genereert records voor broers en zussen met dezelfde ouders en hetzelfde adres.
+    """
+    # Genereer fixed BSN's voor brusje modus
+    fixed_bsn_vader = random_bsn()
+    fixed_bsn_moeder = random_bsn()
+    
+    print(f"Brusje modus: Fixed BSN voor vader gegenereerd: {fixed_bsn_vader}")
+    print(f"Brusje modus: Fixed BSN voor moeder gegenereerd: {fixed_bsn_moeder}")
+    
+    # Zet alle andere overrides die nodig zijn voor brusje
+    if not getattr(args, 'naamvader', None):
+        args.naamvader = random.choice(voornamen_man)
+        print(f"Brusje modus: Naam vader gezet op: {args.naamvader}")
+    
+    if not getattr(args, 'naammoeder', None):
+        args.naammoeder = random.choice(voornamen_vrouw)
+        print(f"Brusje modus: Naam moeder gezet op: {args.naammoeder}")
+    
+    if not getattr(args, 'achternaam', None):
+        args.achternaam = random.choice(achternamen)
+        print(f"Brusje modus: Achternaam gezet op: {args.achternaam}")
+    
+    if not getattr(args, 'adres', None):
+        straat = random.choice(straatnamen)
+        huisnr = random.randint(1, 100)
+        postcode = generate_random_postcode()
+        plaats = random.choice(plaatsnamen)
+        args.adres = f"{straat} {huisnr} {postcode} {plaats}"
+        print(f"Brusje modus: Adres gezet op: {args.adres}")
+    
+    print("Brusje modus actief: Alle kinderen krijgen dezelfde ouders en hetzelfde adres")
+    
+    # Roep generateMultipleRecords aan met de gefixeerde BSN's
+    return generateMultipleRecords(
+        args, 
+        aantal, 
+        gebruikte_bsns, 
+        gebruikte_namen, 
+        fixed_bsn_vader, 
+        fixed_bsn_moeder
+    )
+
+def generateRecords(args, aantal, gebruikte_bsns=None, gebruikte_namen=None):
+    """
+    Centrale functie voor het genereren van records. Bepaalt automatisch de juiste modus
+    op basis van de opgegeven argumenten.
+    """
+    # Check of brusje modus actief is
+    if getattr(args, 'brusje', False):
+        return generateBrusjeRecords(args, aantal, gebruikte_bsns, gebruikte_namen)
+    
+    # Bepaal of er fixed BSN's nodig zijn
+    fixed_bsn_vader = None
+    fixed_bsn_moeder = None
+    
+    if getattr(args, 'fixbsnvader', False):
+        fixed_bsn_vader = random_bsn()
+        print(f"Fixed BSN voor vader gegenereerd: {fixed_bsn_vader}")
+    
+    if getattr(args, 'fixbsnmoeder', False):
+        fixed_bsn_moeder = random_bsn()
+        print(f"Fixed BSN voor moeder gegenereerd: {fixed_bsn_moeder}")
+    
+    # Gebruik de standaard generatie met eventuele fixed BSN's
+    return generateMultipleRecords(
+        args, 
+        aantal, 
+        gebruikte_bsns, 
+        gebruikte_namen, 
+        fixed_bsn_vader, 
+        fixed_bsn_moeder
+    )
+
+def generateAllRecords(args, aantal_bestanden, aantal_dossiers_per_bestand):
+    """
+    Genereert alle records voor alle bestanden, met state tracking voor unieke BSN's en namen.
+    """
+    gebruikte_bsns = set()
+    gebruikte_namen = set()
+    
+    alle_sets = []
+    
+    print(f"Genereren van {aantal_bestanden} bestanden met {aantal_dossiers_per_bestand} dossiers per bestand")
+    print(f"Brusje modus: {getattr(args, 'brusje', False)}")
+    print()
+    
+    for i in range(1, aantal_bestanden + 1):
+        print(f"Genereren van bestand {i}/{aantal_bestanden}...")
+        
+        # In brusje modus: reset namen per bestand omdat elk bestand een andere familie is
+        # BSN's blijven globaal uniek
+        if getattr(args, 'brusje', False):
+            namen_voor_dit_bestand = set()
+            print(f"  - Huidige staat: {len(gebruikte_bsns)} gebruikte BSN's (globaal)")
+            print(f"  - Brusje modus: Namen worden gereset per bestand (nieuwe familie)")
+        else:
+            namen_voor_dit_bestand = gebruikte_namen
+            print(f"  - Huidige staat: {len(gebruikte_bsns)} gebruikte BSN's, {len(gebruikte_namen)} gebruikte namen")
+        
+        leerlingen = generateRecords(
+            args,
+            aantal_dossiers_per_bestand,
+            gebruikte_bsns,
+            namen_voor_dit_bestand
+        )
+        
+        print(f"  - Resultaat: {len(leerlingen)} records gegenereerd")
+        if len(leerlingen) < aantal_dossiers_per_bestand:
+            print(f"  - PROBLEEM: Verwachtte {aantal_dossiers_per_bestand} maar kreeg {len(leerlingen)} records")
+        
+        alle_sets.append(leerlingen)
+        
+        # Update globale staat alleen als we niet in brusje modus zijn
+        if not getattr(args, 'brusje', False):
+            gebruikte_namen.update(namen_voor_dit_bestand)
+        
+        # Logging: toon relevante informatie per modus
+        if getattr(args, 'brusje', False):
+            print(f"  - Nieuwe staat: {len(gebruikte_bsns)} gebruikte BSN's, {len(namen_voor_dit_bestand)} namen in dit bestand")
+        else:
+            print(f"  - Nieuwe staat: {len(gebruikte_bsns)} gebruikte BSN's, {len(gebruikte_namen)} gebruikte namen")
+        print()
+    
+    return alle_sets
 

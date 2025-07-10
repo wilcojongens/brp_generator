@@ -1,12 +1,13 @@
 from generators import genereer_unieke_mapnaam, random_bsn
 from generateBrp import samenstellen_inspoel
-from generateKlassenlijst import samenstellen_klassenlijst, schoolRecord
-from record import generateMultipleRecords
+from generateKlassenlijst import samenstellen_klassenlijst
+from record import generateAllRecords
 import argparse
 import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    # Optionele argumenten voor het genereren van dossiers
     parser.add_argument("--aantal_dossiers", type=int,
                         help="Aantal dossiers per bestand")
     parser.add_argument("--aantal_bestanden", type=int,
@@ -25,6 +26,12 @@ if __name__ == "__main__":
                         help="Onderwijssoortcode (bijv. 01 voor basisonderwijs)")
     parser.add_argument("--postcode_range", nargs="+", type=int,
                         help="Lijst van numerieke postcodes (bv. 7411 7412 7413)")
+    
+    # Argumenten voor het genereren van speciale cases
+    parser.add_argument("--brusje", action="store_true",
+                        help="Zorgt ervoor dat de gegenereerde personen allemaal familieleden zijn van elkaar (brusje)")
+    
+    # Override argumenten voor het gebruik van specifieke waarden
     parser.add_argument("--geboortedatum", type=str,
                         help="Specifieke geboortedatum in YYYYMMDD formaat, laat leeg om te genereren op basis van leeftijd")
     parser.add_argument("--achternaam", type=str,
@@ -41,42 +48,18 @@ if __name__ == "__main__":
                         help="Adres van de gegenereerde personen (bv. 'Waldeckstraat 1 7411AA Deventer')")
     args = parser.parse_args()
 
-    schoolRecord = schoolRecord(
-        brinCode=args.brin,
-        klasOfGroep=args.klas_of_groep,
-        klasnummer=args.klasnummer,
-        naamKlas=args.naam_klas,
-        onderwijssoort=args.onderwijssoort
-    )
-
-    # Genereer fixed BSN's als opgegeven
-    fixed_bsn_vader = None
-    fixed_bsn_moeder = None
-    
-    if args.fixbsnvader:
-        fixed_bsn_vader = random_bsn()
-        print(f"Fixed BSN voor vader gegenereerd: {fixed_bsn_vader}")
-    
-    if args.fixbsnmoeder:
-        fixed_bsn_moeder = random_bsn()
-        print(f"Fixed BSN voor moeder gegenereerd: {fixed_bsn_moeder}")
-
     outputmap = genereer_unieke_mapnaam()
-    gebruikte_bsns = set()
-    gebruikte_namen = set()
     aantal_bestanden = args.aantal_bestanden if args.aantal_bestanden is not None else 1
-    for i in range(1, aantal_bestanden + 1):
-        leerlingen = generateMultipleRecords(
-            args,
-            (args.aantal_dossiers or 10),
-            gebruikte_bsns,
-            gebruikte_namen,
-            fixed_bsn_vader,
-            fixed_bsn_moeder
-        )
+    aantal_dossiers = args.aantal_dossiers or 10
+    
+    # Genereer alle records voor alle bestanden
+    alle_leerlingen_sets = generateAllRecords(args, aantal_bestanden, aantal_dossiers)
+    
+    # Schrijf elk set naar bestanden
+    for i, leerlingen in enumerate(alle_leerlingen_sets, 1):
         submap = os.path.join(outputmap, f"set_{i}")
         os.makedirs(submap, exist_ok=True)
         inspoel_pad = os.path.join(submap, f"BRP_inspoel_{i}.txt")
         klassenlijst_pad = os.path.join(submap, f"klassenlijst_{i}.csv")
         samenstellen_inspoel(leerlingen, bestandsnaam=inspoel_pad)
-        samenstellen_klassenlijst(leerlingen, schoolRecord, bestandsnaam=klassenlijst_pad)
+        samenstellen_klassenlijst(leerlingen, args, bestandsnaam=klassenlijst_pad)
