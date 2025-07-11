@@ -14,6 +14,16 @@ Default: 1
 Leeftijd van de te genereren personen, er wordt een willekeurige datum gekozen van X jaar geleden
 Default: 10
 
+--minimum_leeftijd
+Minimale leeftijd van de te genereren personen
+Er wordt een willekeurige geboortedatum gekozen die resulteert in een leeftijd tussen minimum en maximum
+Default: Gebruikt --leeftijd waarde of 10
+
+--maximum_leeftijd
+Maximale leeftijd van de te genereren personen
+Als niet opgegeven wordt de minimum_leeftijd als maximum gebruikt
+Default: Gebruikt minimum_leeftijd waarde
+
 --brin
 Brin van de school waar de kinderen in worden geplaatst
 Default: BRIN
@@ -61,7 +71,7 @@ Override om een specifieke voornaam voor de vader te hanteren voor alle dossiers
 Override om een specifiek BSN voor de vader te hanteren voor alle dossiers
 
 --naammoeder
---Override om een specifieke voornaam voor de moeder te hanteren voor alle dossiers
+Override om een specifieke voornaam voor de moeder te hanteren voor alle dossiers
 
 --fixbsnmoeder
 Override om een specifiek BSN voor de moeder te hanteren voor alle dossiers

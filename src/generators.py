@@ -51,9 +51,44 @@ def random_bsn():
             return str(bsn)
 
 
-def random_datum(leeftijd):
+def random_datum(minimum_leeftijd, maximum_leeftijd=None):
+    """
+    Genereert een willekeurige geboortedatum tussen minimum en maximum leeftijd.
+    
+    Args:
+        minimum_leeftijd (int): Minimale leeftijd in jaren
+        maximum_leeftijd (int, optional): Maximale leeftijd in jaren. 
+                                        Als niet opgegeven, wordt minimum_leeftijd als maximum gebruikt.
+    
+    Returns:
+        datetime.date: Geboortedatum die resulteert in een leeftijd tussen min en max
+    """
+    if maximum_leeftijd is None:
+        maximum_leeftijd = minimum_leeftijd
+    
+    if minimum_leeftijd > maximum_leeftijd:
+        raise ValueError("Minimum leeftijd kan niet groter zijn dan maximum leeftijd")
+    
     huidige_datum = datetime.today()
-    start = huidige_datum.replace(year=huidige_datum.year - leeftijd, month=1, day=1)
-    end = huidige_datum.replace(year=huidige_datum.year - leeftijd, month=12, day=31)
-    delta = (end - start).days
-    return (start + timedelta(days=random.randint(0, delta))).date()
+    
+    # Bereken de datum ranges die resulteren in de gewenste leeftijden
+    # Voor minimum leeftijd: kind moet minstens X jaar oud zijn
+    max_geboortedatum = huidige_datum.replace(year=huidige_datum.year - minimum_leeftijd, month=huidige_datum.month, day=huidige_datum.day)
+    
+    # Voor maximum leeftijd: kind mag maximaal Y jaar oud zijn  
+    min_geboortedatum = huidige_datum.replace(year=huidige_datum.year - maximum_leeftijd - 1, month=huidige_datum.month, day=huidige_datum.day) + timedelta(days=1)
+    
+    # Genereer willekeurige datum tussen deze grenzen
+    delta = (max_geboortedatum - min_geboortedatum).days
+    if delta < 0:
+        raise ValueError(f"Geen geldige datumrange mogelijk voor leeftijden {minimum_leeftijd}-{maximum_leeftijd}")
+    
+    random_date = min_geboortedatum + timedelta(days=random.randint(0, delta))
+    
+    # Valideer dat de gegenereerde datum resulteert in de juiste leeftijd
+    leeftijd = (huidige_datum - random_date).days // 365
+    if leeftijd < minimum_leeftijd or leeftijd > maximum_leeftijd:
+        # Als validatie faalt, probeer het opnieuw (recursief)
+        return random_datum(minimum_leeftijd, maximum_leeftijd)
+    
+    return random_date.date()

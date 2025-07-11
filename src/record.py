@@ -25,7 +25,22 @@ class Record:
 def generateSingleRecord(args, geslacht, fixed_bsn_vader=None, fixed_bsn_moeder=None):
     voornaam = random.choice(voornamen_man if geslacht == "M" else voornamen_vrouw)
     achternaam = getattr(args, "achternaam", None) or random.choice(achternamen)
-    geboortedatum = getattr(args, "geboortedatum", None) or random_datum(args.leeftijd or 10)
+    
+    # Bepaal geboortedatum
+    if getattr(args, "geboortedatum", None):
+        geboortedatum = args.geboortedatum
+    else:
+        # Gebruik nieuwe minimum/maximum leeftijd argumenten
+        minimum_leeftijd = getattr(args, "minimum_leeftijd", None)
+        maximum_leeftijd = getattr(args, "maximum_leeftijd", None)
+        
+        # Backward compatibility met oude --leeftijd argument
+        if minimum_leeftijd is None and maximum_leeftijd is None:
+            minimum_leeftijd = getattr(args, "leeftijd", 10)
+        elif minimum_leeftijd is None:
+            minimum_leeftijd = maximum_leeftijd
+        
+        geboortedatum = random_datum(minimum_leeftijd, maximum_leeftijd)
 
     # Genereer voornamen voor ouders
     voornaam_vader = getattr(args, "naamvader", None) or random.choice(voornamen_man)

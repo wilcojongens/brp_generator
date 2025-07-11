@@ -3,6 +3,7 @@ from generateBrp import samenstellen_inspoel
 from generateKlassenlijst import samenstellen_klassenlijst
 from record import generateAllRecords
 import argparse
+import datetime
 import os
 
 if __name__ == "__main__":
@@ -14,6 +15,10 @@ if __name__ == "__main__":
                         help="Aantal bestanden per serie")
     parser.add_argument("--leeftijd", type=int,
                         help="Leeftijd van de gegenereerde personen")
+    parser.add_argument("--minimum_leeftijd", type=int,
+                        help="Minimale leeftijd van de gegenereerde personen")
+    parser.add_argument("--maximum_leeftijd", type=int,
+                        help="Maximale leeftijd van de gegenereerde personen")
     parser.add_argument("--brin", type=str,
                         help="BRIN-code van de school")
     parser.add_argument("--klas_of_groep", type=str,
@@ -32,7 +37,7 @@ if __name__ == "__main__":
                         help="Zorgt ervoor dat de gegenereerde personen allemaal familieleden zijn van elkaar (brusje)")
     
     # Override argumenten voor het gebruik van specifieke waarden
-    parser.add_argument("--geboortedatum", type=str,
+    parser.add_argument("--geboortedatum", type=datetime.date.fromisoformat,
                         help="Specifieke geboortedatum in YYYYMMDD formaat, laat leeg om te genereren op basis van leeftijd")
     parser.add_argument("--achternaam", type=str,
                         help="Achternaam van de gegenereerde personen")
