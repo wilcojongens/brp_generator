@@ -36,9 +36,13 @@ def generateSingleRecord(args, geslacht, fixed_bsn_vader=None, fixed_bsn_moeder=
         
         # Backward compatibility met oude --leeftijd argument
         if minimum_leeftijd is None and maximum_leeftijd is None:
-            minimum_leeftijd = getattr(args, "leeftijd", 10)
+            leeftijd_arg = getattr(args, "leeftijd", None)
+            minimum_leeftijd = leeftijd_arg if leeftijd_arg is not None else 10
+            maximum_leeftijd = minimum_leeftijd
         elif minimum_leeftijd is None:
             minimum_leeftijd = maximum_leeftijd
+        elif maximum_leeftijd is None:
+            maximum_leeftijd = minimum_leeftijd
         
         geboortedatum = random_datum(minimum_leeftijd, maximum_leeftijd)
 
