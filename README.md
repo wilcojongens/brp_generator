@@ -11,18 +11,23 @@ Bepaald het aantal bestanden waarin de dossiers worden opgenomen
 Default: 1
 
 --leeftijd
-Leeftijd van de te genereren personen, er wordt een willekeurige datum gekozen van X jaar geleden
+Leeftijd van de te genereren personen. Standaard in jaren, maar kan ook in maanden of dagen worden opgegeven met --leeftijd_eenheid.
 Default: 10
 
 --minimum_leeftijd
-Minimale leeftijd van de te genereren personen
-Er wordt een willekeurige geboortedatum gekozen die resulteert in een leeftijd tussen minimum en maximum
+Minimale leeftijd van de te genereren personen. Standaard in jaren, zie --leeftijd_eenheid.
+Er wordt een willekeurige geboortedatum gekozen die resulteert in een leeftijd tussen minimum en maximum.
 Default: Gebruikt --leeftijd waarde of 10
 
 --maximum_leeftijd
-Maximale leeftijd van de te genereren personen
-Als niet opgegeven wordt de minimum_leeftijd als maximum gebruikt
+Maximale leeftijd van de te genereren personen. Standaard in jaren, zie --leeftijd_eenheid.
+Als niet opgegeven wordt de minimum_leeftijd als maximum gebruikt.
 Default: Gebruikt minimum_leeftijd waarde
+
+--leeftijd_eenheid
+Eenheid voor leeftijdsargumenten: 'jaar', 'maand' of 'dag'.
+Default: jaar
+Voorbeeld: --minimum_leeftijd 1 --maximum_leeftijd 3 --leeftijd_eenheid maand (kinderen van 1 tot 3 maanden oud)
 
 --brin
 Brin van de school waar de kinderen in worden geplaatst

@@ -44,7 +44,8 @@ def generateSingleRecord(args, geslacht, fixed_bsn_vader=None, fixed_bsn_moeder=
         elif maximum_leeftijd is None:
             maximum_leeftijd = minimum_leeftijd
         
-        geboortedatum = random_datum(minimum_leeftijd, maximum_leeftijd)
+    eenheid = getattr(args, "leeftijd_eenheid", "jaar")
+    geboortedatum = random_datum(minimum_leeftijd, maximum_leeftijd, eenheid)
 
     # Genereer voornamen voor ouders
     voornaam_vader = getattr(args, "naamvader", None) or random.choice(voornamen_man)

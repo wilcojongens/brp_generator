@@ -13,12 +13,14 @@ if __name__ == "__main__":
                         help="Aantal dossiers per bestand")
     parser.add_argument("--aantal_bestanden", type=int,
                         help="Aantal bestanden per serie")
-    parser.add_argument("--leeftijd", type=int,
-                        help="Leeftijd van de gegenereerde personen")
-    parser.add_argument("--minimum_leeftijd", type=int,
-                        help="Minimale leeftijd van de gegenereerde personen")
-    parser.add_argument("--maximum_leeftijd", type=int,
-                        help="Maximale leeftijd van de gegenereerde personen")
+    parser.add_argument("--leeftijd", type=float,
+                        help="Leeftijd van de gegenereerde personen (standaard in jaren, zie --leeftijd_eenheid)")
+    parser.add_argument("--minimum_leeftijd", type=float,
+                        help="Minimale leeftijd van de gegenereerde personen (standaard in jaren, zie --leeftijd_eenheid)")
+    parser.add_argument("--maximum_leeftijd", type=float,
+                        help="Maximale leeftijd van de gegenereerde personen (standaard in jaren, zie --leeftijd_eenheid)")
+    parser.add_argument("--leeftijd_eenheid", type=str, choices=["jaar", "maand", "dag"], default="jaar",
+                        help="Eenheid voor leeftijdsargumenten: 'jaar', 'maand' of 'dag'. Default: 'jaar'")
     parser.add_argument("--brin", type=str,
                         help="BRIN-code van de school")
     parser.add_argument("--klas_of_groep", type=str,
@@ -56,10 +58,13 @@ if __name__ == "__main__":
     outputmap = genereer_unieke_mapnaam()
     aantal_bestanden = args.aantal_bestanden if args.aantal_bestanden is not None else 1
     aantal_dossiers = args.aantal_dossiers or 10
-    
+
     # Genereer alle records voor alle bestanden
+    # Zorg dat leeftijd_eenheid wordt doorgegeven aan record-generatie
+    if not hasattr(args, 'leeftijd_eenheid'):
+        args.leeftijd_eenheid = "jaar"
     alle_leerlingen_sets = generateAllRecords(args, aantal_bestanden, aantal_dossiers)
-    
+
     # Schrijf elk set naar bestanden
     for i, leerlingen in enumerate(alle_leerlingen_sets, 1):
         submap = os.path.join(outputmap, f"set_{i}")
