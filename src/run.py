@@ -21,6 +21,8 @@ if __name__ == "__main__":
                         help="Maximale leeftijd van de gegenereerde personen (standaard in jaren, zie --leeftijd_eenheid)")
     parser.add_argument("--leeftijd_eenheid", type=str, choices=["jaar", "maand", "dag"], default="jaar",
                         help="Eenheid voor leeftijdsargumenten: 'jaar', 'maand' of 'dag'. Default: 'jaar'")
+    parser.add_argument("--klant", type=str,
+                        help="Naam van de klant voor specifieke postcode/plaatsnaam datasets (bv. zuid_limburg)")
     parser.add_argument("--brin", type=str,
                         help="BRIN-code van de school")
     parser.add_argument("--klas_of_groep", type=str,

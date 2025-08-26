@@ -60,6 +60,14 @@ Default: [7411]
 Voeg deze optie toe om te zorgen dat alle dossiers dezelfde achternaam, ouders en adressen bevatten.
 Deze worden dan éénmaal gegenereerd en vervolgens voor alle dossiers hergebruikt.
 
+--klant
+Met deze optie kun je klant-specifieke datasets gebruiken voor postcode en plaatsnaam.
+Voorbeeld: --klant zuid_limburg
+Hiermee worden alleen postcodes en plaatsnamen uit de zuid_limburg-datasets gebruikt (zie src/data/adressen.py).
+Als er geen dataset voor de opgegeven klant bestaat, krijg je een nette foutmelding.
+Je kunt eenvoudig nieuwe klant-datasets toevoegen door in adressen.py een lijst aan te maken zoals:
+	plaatsnamen_<klantnaam>, postcode_range_<klantnaam>, postcode_letters_<klantnaam>
+
 ## Override arguments
 
 --geboortedatum

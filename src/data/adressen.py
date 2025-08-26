@@ -20,7 +20,8 @@ postcode_range = [7411, 7412, 7413, 7414, 7415, 7416, 7417, 7418, 7419, 7420, 74
                   8100, 8101, 8102, 8103, 8104, 8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114,
                   9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014,
                   9100, 9101, 9102, 9103, 9104, 9105, 9106, 9107, 9108, 9109, 9110, 9111, 9112, 9113, 9114]
-postcode_letters = [("AA", "ZZ")]
+import string
+postcode_letters = [a+b for a in string.ascii_uppercase for b in string.ascii_uppercase]
 plaatsnamen = [
     "Enschede", "Glanerbrug", "Almelo", "Denekamp", "Borne", "Hengelo", "Markelo", "Holten",
     "Nijverdal", "Oldenzaal", "Rijssen", "Vriezenveen", "Deventer", "Zwolle", "Apeldoorn",
@@ -31,4 +32,13 @@ plaatsnamen = [
     "Veendam", "Stadskanaal", "Ter Apel", "Musselkanaal", "Nieuwe Pekela", "Oude Pekela",
     "Winschoten", "Scheemda", "Zuidhorn", "Leek", "Roden", "Peize", "Norg", "Raalte",
     "Dalfsen", "Ommen", "Hardenberg", "Coevorden", "Hoogeveen", "Dedemsvaart", "Nieuwleusen"
+]
+plaatsnamen_zuid_limburg = [
+    "Beek", "Heerlen", "Landgraaf", "Maastricht", "Valkenburg"
+]
+postcode_range_zuid_limburg = [
+    6191, 6411, 6371, 6216, 6021
+]
+postcode_letters_zuid_limburg = [
+    "JL", "TE", "VA", "BX", "ZK",
 ]

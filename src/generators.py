@@ -1,4 +1,4 @@
-from data.adressen import postcode_letters, postcode_range
+import data.adressen as adressen
 from datetime import datetime, timedelta
 import random
 import string
@@ -29,13 +29,26 @@ def genereer_a_nummer():
             continue
         return ''.join(str(c) for c in cijfers)
 
-def generate_random_postcode():
+def get_adressen_dataset(klant=None):
+    if klant:
+        # Dynamisch zoeken naar dataset, bv. postcode_range_zuid_limburg
+        try:
+            postcode_range = getattr(adressen, f"postcode_range_{klant}")
+            postcode_letters = getattr(adressen, f"postcode_letters_{klant}")
+            plaatsnamen = getattr(adressen, f"plaatsnamen_{klant}")
+        except AttributeError:
+            raise ValueError(f"Geen adresdataset gevonden voor klant '{klant}'. Voeg deze toe aan adressen.py.")
+    else:
+        postcode_range = adressen.postcode_range
+        postcode_letters = adressen.postcode_letters
+        plaatsnamen = adressen.plaatsnamen
+    return postcode_range, postcode_letters, plaatsnamen
+
+def generate_random_postcode(klant=None):
+    postcode_range, postcode_letters, _ = get_adressen_dataset(klant)
     nummer = str(random.choice(postcode_range))
-    while True:
-        letters = ''.join(random.choices(string.ascii_uppercase, k=2))
-        for start, end in postcode_letters:
-            if start <= letters <= end:
-                return f"{nummer}{letters}"
+    letters = random.choice(postcode_letters)
+    return f"{nummer}{letters}"
 
 def random_bsn():
     def is_geldig_bsn(bsn_str):

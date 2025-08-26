@@ -55,14 +55,27 @@ def generateSingleRecord(args, geslacht, fixed_bsn_vader=None, fixed_bsn_moeder=
     bsn_vader = fixed_bsn_vader if fixed_bsn_vader else random_bsn()
     bsn_moeder = fixed_bsn_moeder if fixed_bsn_moeder else random_bsn()
 
+    klant = getattr(args, "klant", None)
     if getattr(args, "adres", None):
         straatnaam, huisnummer, postcode, woonplaats = args.adres.split(" ")
     else:
         straatnaam = random.choice(straatnamen)
         huisnummer = random.randint(1, 100)
-        postcode = generate_random_postcode()
-        woonplaats = random.choice(plaatsnamen)
+        postcode = generate_random_postcode(klant)
+        # Dynamisch ophalen van plaatsnamen per klant
+        try:
+            from generators import get_adressen_dataset
+            _, _, plaatsnamen_set = get_adressen_dataset(klant)
+        except Exception as e:
+            raise ValueError(str(e))
+        woonplaats = random.choice(plaatsnamen_set)
 
+    # Ook geboorteplaats op basis van klant
+    try:
+        from generators import get_adressen_dataset
+        _, _, plaatsnamen_set = get_adressen_dataset(klant)
+    except Exception as e:
+        raise ValueError(str(e))
     return Record(
         bsn=random_bsn(),
         voornaamKind=voornaam,
@@ -73,7 +86,7 @@ def generateSingleRecord(args, geslacht, fixed_bsn_vader=None, fixed_bsn_moeder=
         postcode=postcode,
         woonplaats=woonplaats,
         geslacht=geslacht,
-        geboorteplaats=random.choice(plaatsnamen),
+        geboorteplaats=random.choice(plaatsnamen_set),
         voornaamVader=voornaam_vader,
         bsnVader=bsn_vader,
         voornaamMoeder=voornaam_moeder,
